@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/csv"
+	"flag"
 	"fmt"
 	"log"
 	"os"
+	"time"
 )
 
 func main() {
@@ -15,6 +17,11 @@ func main() {
 }
 
 func readCsv() {
+	var timerValue int
+	flag.IntVar(&timerValue, "timer", 30, "variable to set timer size in seconds")
+	flag.Parse()
+
+	timer := time.NewTimer(time.Duration(timerValue) * time.Second)
 	// Open the CSV file
 	file, err := os.Open("problems.csv")
 	if err != nil {
@@ -33,6 +40,15 @@ func readCsv() {
 
 	// Process the records
 	for _, record := range records {
-		fmt.Printf("%v,%v\n", record[0], record[1])
+		select {
+		case <-timer.C:
+			fmt.Println("Time's up!")
+			return
+		default:
+			// Process the record (for example, print it)
+			fmt.Printf("%v,%v\n", record[0], record[1])
+		}
 	}
+
+	fmt.Println("Finished", len(records))
 }
